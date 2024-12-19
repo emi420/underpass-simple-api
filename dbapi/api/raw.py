@@ -163,7 +163,7 @@ class Raw:
             if lines and "features" in lines and lines['features']:
                 jsonResult['features'] = jsonResult['features'] + lines['features']
 
-            elif nodes and "features" in nodes and nodes['features']:
+            if nodes and "features" in nodes and nodes['features']:
                 jsonResult['features'] = jsonResult['features'] + nodes['features']
         
             # elif relations and "features" in relations and relations['features']:
