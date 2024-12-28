@@ -10,6 +10,7 @@ class BaseRequest(BaseModel):
     dateFrom: str = None
     dateTo: str = None
     featureType: str = None
+    osm_id: str = None
 
 class RawRequest(BaseRequest):
     pass

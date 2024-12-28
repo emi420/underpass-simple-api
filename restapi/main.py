@@ -66,14 +66,16 @@ class Raw:
         tags: str = "",
         hashtag: str= "",
         dateFrom: str = "",
-        dateTo: str= ""
+        dateTo: str= "",
+        osm_id: str= ""
     ):
         request = RawRequest(
             area=area,
             tags=tags,
             hashtag=hashtag,
             dateFrom=dateFrom,
-            dateTo=dateTo
+            dateTo=dateTo,
+            osm_id=osm_id
         )
         return await raw.features(request)
 

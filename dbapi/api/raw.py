@@ -37,6 +37,7 @@ class RawFeaturesParamsDTO:
     dateFrom: str = ""
     dateTo: str = ""
     table: Table = Table.nodes
+    osm_id: str = ""
 
 # Build queries for getting geometry features
 def geoFeaturesQuery(params: RawFeaturesParamsDTO, asJson: bool = False):
@@ -51,10 +52,11 @@ def geoFeaturesQuery(params: RawFeaturesParamsDTO, asJson: bool = False):
             closed_at \n \
             FROM {table} \n \
             LEFT JOIN changesets c ON c.id = {table}.changeset \n \
-            WHERE{area}{tags}{hashtag}{date} {limit}; \n \
+            WHERE{osm_id}{area}{tags}{hashtag}{date} {limit}; \n \
         ".format(
             type=geoType.value,
             table=params.table.value,
+            osm_id=" AND osm_id={osm_id}".format(osm_id=params.osm_id) if params.osm_id else "",
             area=" AND ST_Intersects(\"geom\", ST_GeomFromText('MULTIPOLYGON((({area})))', 4326) ) \n"
                 .format(area=params.area) if params.area else "",
             tags=" AND (" + tagsQueryFilter(params.tags, params.table.value) + ") \n" if params.tags else "",
@@ -179,4 +181,3 @@ class Raw:
             result = [polygons, lines, nodes]
             return result
 
-    

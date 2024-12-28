@@ -51,6 +51,7 @@ async def features(request: RawRequest):
             hashtag = request.hashtag,
             dateFrom = request.dateFrom,
             dateTo = request.dateTo,
+            osm_id = request.osm_id,
        ), asJson=True)
     )
 
