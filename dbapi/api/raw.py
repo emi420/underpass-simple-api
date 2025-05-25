@@ -24,9 +24,10 @@ class Table(Enum):
 
 # OSM types
 class OsmType(Enum):
+    ways_line = "way"
+    ways_poly = "way"
     nodes = "node"
-    lines = "way"
-    polygons = "way"
+    relations = "relation"
 
 # Raw Features parameters  DTO
 @dataclass
@@ -38,11 +39,15 @@ class RawFeaturesParamsDTO:
     dateTo: str = ""
     table: Table = Table.nodes
     osm_id: str = ""
+    order_by: str = ""
+    limit: str = RESULTS_PER_PAGE
 
 # Build queries for getting geometry features
 def geoFeaturesQuery(params: RawFeaturesParamsDTO, asJson: bool = False):
     geoType:GeoType = GeoType[params.table.name]
-    query = "SELECT '{type}' as type, \
+    osmType = OsmType[Table[params.table.name].value].value
+    query = "SELECT \
+            '{osm_type}' as osm_type, \
             osm_id as id, \n \
             timestamp, \n \
             ST_AsText(geom) as geometry, \n \
@@ -52,9 +57,10 @@ def geoFeaturesQuery(params: RawFeaturesParamsDTO, asJson: bool = False):
             closed_at \n \
             FROM {table} \n \
             LEFT JOIN changesets c ON c.id = {table}.changeset \n \
-            WHERE{osm_id}{area}{tags}{hashtag}{date} {limit}; \n \
+            WHERE{osm_id}{area}{tags}{hashtag}{date}{order_by}{limit}; \n \
         ".format(
             type=geoType.value,
+            osm_type=osmType,
             table=params.table.value,
             osm_id=" AND osm_id={osm_id}".format(osm_id=params.osm_id) if params.osm_id else "",
             area=" AND ST_Intersects(\"geom\", ST_GeomFromText('MULTIPOLYGON((({area})))', 4326) ) \n"
@@ -64,8 +70,12 @@ def geoFeaturesQuery(params: RawFeaturesParamsDTO, asJson: bool = False):
             date=" AND closed_at >= {dateFrom} AND closed_at <= {dateTo}\n"
                 .format(dateFrom=params.dateFrom, dateTo=params.dateTo) 
                 if params.dateFrom and params.dateTo else "\n",
-            limit=" LIMIT {limit}".format(limit=RESULTS_PER_PAGE)
+            order_by=" ORDER BY {order_by}".format(order_by=params.order_by) if params.order_by else "",
+            limit=" LIMIT {limit}".format(limit=params.limit) if params.limit else "",
         ).replace("WHERE AND", "WHERE")
+
+    if not (params.osm_id or params.area or params.tags or params.dateFrom or params.dateTo):
+        query = query.replace("WHERE", "")
 
     if asJson:
         return rawQueryToJSON(query, params)
@@ -153,9 +163,9 @@ class Raw:
     ):
         if asJson:
 
-            polygons = json.loads(await self.getPolygons(params, asJson))
-            lines = json.loads(await self.getLines(params, asJson))
-            nodes = json.loads(await self.getNodes(params, asJson))
+            polygons = json.loads(await self.getPolygons(params, asJson) or "{}")
+            lines = json.loads(await self.getLines(params, asJson) or "{}")
+            nodes = json.loads(await self.getNodes(params, asJson) or "{}")
 
             jsonResult = {'type': 'FeatureCollection', 'features': []}
 

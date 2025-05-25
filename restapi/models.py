@@ -11,6 +11,8 @@ class BaseRequest(BaseModel):
     dateTo: str = None
     featureType: str = None
     osm_id: str = None
+    order_by: str = None
+    limit: str = "500"
 
 class RawRequest(BaseRequest):
     pass
