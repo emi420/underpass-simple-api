@@ -23,7 +23,27 @@ class Index:
 
 class Raw:
     @app.get("/raw/polygons")
-    async def polygons(request: RawRequest):
+    async def polygons(
+        area: str = "",
+        tags: str = "",
+        hashtag: str= "",
+        dateFrom: str = "",
+        dateTo: str = "",
+        osm_id: str = "",
+        order_by: str = "",
+        limit: str = ""
+    ):
+        request = RawRequest(
+            area=area,
+            tags=tags,
+            hashtag=hashtag,
+            dateFrom=dateFrom,
+            dateTo=dateTo,
+            osm_id=osm_id,
+            order_by=order_by,
+            limit=limit
+
+        )
         return await raw.polygons(request)
 
     @app.get("/raw/nodes")
@@ -32,14 +52,20 @@ class Raw:
         tags: str = "",
         hashtag: str= "",
         dateFrom: str = "",
-        dateTo: str= ""
+        dateTo: str = "",
+        osm_id: str = "",
+        order_by: str = "",
+        limit: str = ""
     ):
         request = RawRequest(
             area=area,
             tags=tags,
             hashtag=hashtag,
             dateFrom=dateFrom,
-            dateTo=dateTo
+            dateTo=dateTo,
+            osm_id=osm_id,
+            order_by=order_by,
+            limit=limit
         )
         return await raw.nodes(request)
 
@@ -49,16 +75,47 @@ class Raw:
         tags: str = "",
         hashtag: str= "",
         dateFrom: str = "",
-        dateTo: str= ""
+        dateTo: str = "",
+        osm_id: str = "",
+        order_by: str = "",
+        limit: str = ""
     ):
         request = RawRequest(
             area=area,
             tags=tags,
             hashtag=hashtag,
             dateFrom=dateFrom,
-            dateTo=dateTo
+            dateTo=dateTo,
+            osm_id=osm_id,
+            order_by=order_by,
+            limit=limit
+
         )
         return await raw.lines(request)
+
+    @app.get("/raw/relations")
+    async def relations(
+        area: str = "",
+        tags: str = "",
+        hashtag: str= "",
+        dateFrom: str = "",
+        dateTo: str = "",
+        osm_id: str = "",
+        order_by: str = "",
+        limit: str = ""
+    ):
+        request = RawRequest(
+            area=area,
+            tags=tags,
+            hashtag=hashtag,
+            dateFrom=dateFrom,
+            dateTo=dateTo,
+            osm_id=osm_id,
+            order_by=order_by,
+            limit=limit
+
+        )
+        return await raw.relations(request)
 
     @app.get("/raw/features")
     async def features(

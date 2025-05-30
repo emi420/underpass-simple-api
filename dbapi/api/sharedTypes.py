@@ -12,4 +12,5 @@ class GeoType(Enum):
     polygons = "Polygon"
     lines = "LineString"
     nodes = "Node"
+    relations = "Polygon"
 

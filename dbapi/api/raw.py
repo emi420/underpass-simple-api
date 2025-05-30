@@ -73,7 +73,6 @@ def geoFeaturesQuery(params: RawFeaturesParamsDTO, asJson: bool = False):
             order_by=" ORDER BY {order_by}".format(order_by=params.order_by) if params.order_by else "",
             limit=" LIMIT {limit}".format(limit=params.limit) if params.limit else "",
         ).replace("WHERE AND", "WHERE")
-
     if not (params.osm_id or params.area or params.tags or params.dateFrom or params.dateTo):
         query = query.replace("WHERE", "")
 
@@ -115,6 +114,8 @@ class Raw:
             return self.getNodes(params, asJson)
         elif featureType == "polygon":
             return self.getPolygons(params, asJson)
+        elif featureType == "relation":
+            return self.getRelations(params, asJson)
         else:
             return await self.getAll(params, asJson)
 
@@ -125,6 +126,18 @@ class Raw:
         asJson: bool = False
     ):
         params.table = Table.polygons
+        result = await self.db.run(geoFeaturesQuery(params, asJson), asJson=asJson)
+        if asJson:
+            return result or {}
+        return deserializeTags(result)
+
+    # Get relations features
+    async def getRelations(
+        self,
+        params: RawFeaturesParamsDTO,
+        asJson: bool = False
+    ):
+        params.table = Table.relations
         result = await self.db.run(geoFeaturesQuery(params, asJson), asJson=asJson)
         if asJson:
             return result or {}
@@ -166,6 +179,7 @@ class Raw:
             polygons = json.loads(await self.getPolygons(params, asJson) or "{}")
             lines = json.loads(await self.getLines(params, asJson) or "{}")
             nodes = json.loads(await self.getNodes(params, asJson) or "{}")
+            relations = json.loads(await self.getRelations(params, asJson) or "{}")
 
             jsonResult = {'type': 'FeatureCollection', 'features': []}
 
@@ -178,14 +192,15 @@ class Raw:
             if nodes and "features" in nodes and nodes['features']:
                 jsonResult['features'] = jsonResult['features'] + nodes['features']
         
-            # elif relations and "features" in relations and relations['features']:
-            #     result['features'] = result['features'] + relations['features']
+            if relations and "features" in relations and relations['features']:
+                jsonResult['features'] = jsonResult['features'] + relations['features']
 
             result = json.dumps(jsonResult)
             return result
 
         else:
             polygons = await self.getPolygons(params)
+            relations = await self.getRelations(params)
             lines = await self.getLines(params)
             nodes = await self.getNodes(params)
             result = [polygons, lines, nodes]

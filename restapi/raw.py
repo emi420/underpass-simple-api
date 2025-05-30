@@ -18,6 +18,7 @@ async def polygons(request: RawRequest):
             hashtag = request.hashtag,
             dateFrom = request.dateFrom,
             dateTo = request.dateTo,
+            osm_id = request.osm_id,
             order_by = request.order_by,
             limit = request.limit,
         ), asJson=True)
@@ -31,6 +32,7 @@ async def nodes(request: RawRequest):
             hashtag = request.hashtag,
             dateFrom = request.dateFrom,
             dateTo = request.dateTo,
+            osm_id = request.osm_id,
             order_by = request.order_by,
             limit = request.limit,
         ), asJson=True)
@@ -44,6 +46,21 @@ async def lines(request: RawRequest):
             hashtag = request.hashtag,
             dateFrom = request.dateFrom,
             dateTo = request.dateTo,
+            osm_id = request.osm_id,
+            order_by = request.order_by,
+            limit = request.limit,
+        ), asJson=True)
+    )
+
+async def relations(request: RawRequest):
+    return json.loads(await raw.getRelations(
+        RawApi.RawFeaturesParamsDTO(
+            area = request.area,
+            tags = request.tags,
+            hashtag = request.hashtag,
+            dateFrom = request.dateFrom,
+            dateTo = request.dateTo,
+            osm_id = request.osm_id,
             order_by = request.order_by,
             limit = request.limit,
         ), asJson=True)
